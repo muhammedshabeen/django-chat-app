@@ -41,7 +41,7 @@ class CustomUserManager(BaseUserManager):
 
 class CustomUser(AbstractUser):
     username = models.CharField(max_length=100,unique=True)
-    email = models.EmailField(unique=True)
+    email = models.EmailField(unique=True,null=True,blank=True)
     is_admin = models.BooleanField(auto_created=True,default=False)
     image  = models.ImageField(upload_to='profile_image')
     slug = models.SlugField(unique=True,null=True)
@@ -67,5 +67,30 @@ class CustomUser(AbstractUser):
                 self.image.save(f"{self.username}_avatar.png", ContentFile(response.content), save=False)
         if not self.slug:
             unique_id = str(uuid.uuid4())[:8]
-            self.slug = slugify(f"{self.username}-{self.email[:5]}-{unique_id}")
+            self.slug = slugify(f"{self.username}-{unique_id}")
         super(CustomUser, self).save(*args, **kwargs)
+
+
+class ChatRoom(models.Model):
+    sender_user = models.ForeignKey(CustomUser,on_delete=models.CASCADE,related_name='send_user')
+    receiver_user = models.ForeignKey(CustomUser,on_delete=models.CASCADE,related_name='recieve_user')
+    STATUS_CHOICES = [
+        ('Active', 'Active'),
+        ('Inactive', 'Inactive'),
+        ('Pending', 'Pending'),
+    ]
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
+    
+    def __str__(self):
+        return f'{self.id}- sender-> {self.sender_user} - reviever -> {self.receiver_user}'
+    
+class Message(models.Model):
+    chat_room = models.ForeignKey(ChatRoom, on_delete=models.CASCADE, related_name='messages')
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE,related_name='message_send_user')
+    content = models.TextField()
+    timestamp = models.DateTimeField(auto_now_add=True)
+    STATUS_CHOICES = [
+        ('Active', 'Active'),
+        ('Inactive', 'Inactive'),
+    ]
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='Active')

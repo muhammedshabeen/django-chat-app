@@ -25,3 +25,6 @@ class CustomUserAdmin(UserAdmin):
     ordering = ('email',)
     
 admin.site.register(get_user_model(), CustomUserAdmin)
+
+admin.site.register(ChatRoom)
+admin.site.register(Message)

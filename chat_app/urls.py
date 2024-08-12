@@ -3,5 +3,8 @@ from .views import *
 
 urlpatterns = [
     path('',home,name='home'),
-    path('login',login,name='login'),
+    path('login',user_login,name='login'),
+    path('get_chat_messages/', get_chat_messages, name='get_chat_messages'),
+    path('send_chat_messages/', send_chat_messages, name='send_chat_messages'),
+    path('logout',logout_view,name='logout'),
 ]
