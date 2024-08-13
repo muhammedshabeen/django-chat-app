@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Ably Pub/Sub with Django</title>
+    <script src="https://cdn.ably.io/lib/ably.min-1.js"></script>
+</head>
+<body>
+    <div id="messages"></div>
+    <script>
+        const ably = new Ably.Realtime('gc70zQ.zXfy1g:y6DWJ-wL4XHejWzKQNQSDKcAaczpiHO4ptz5Lx-LY0Y'); // Replace with your Ably API key
+        const chatId = 'default-channel'; // Replace with the chat ID you want to subscribe to
+        const channel = ably.channels.get(chatId);
+
+        // Subscribe to the channel
+        channel.subscribe('message', function(message) {
+            console.log("SUBSCRIBED")
+            const messagesDiv = document.getElementById('messages');
+            const messageElement = document.createElement('p');
+            messageElement.textContent = `Received: ${message.data}`;
+            messagesDiv.appendChild(messageElement);
+        });
+    </script>
+</body>
+</html>

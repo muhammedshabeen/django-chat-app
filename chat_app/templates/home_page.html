@@ -355,7 +355,97 @@
                 chatCard.scrollTop = chatCard.scrollHeight;
             }
         </script>
-        
+
+
+        <script src="https://cdn.ably.io/lib/ably.min-1.js"></script>
+        <script>
+            function Sub(){
+                const ably = new Ably.Realtime('gc70zQ.zXfy1g:y6DWJ-wL4XHejWzKQNQSDKcAaczpiHO4ptz5Lx-LY0Y');
+                const currentUserId = "{{ request.user.id }}";
+                console.log("Current User ID:", currentUserId);
+
+                console.log("SUB ACTIVATED STARTING");
+                chatId = document.getElementById('chat-id-text').value;
+                console.log('qqqqqqqqqqqqqq',typeof(chatId))
+                console.log(chatId)
+                // Set the channel to listen to for incoming messages
+                const channel = ably.channels.get(chatId.toString());
+                console.log("Channel initialized:", channel);
+                console.log(" AFTER SUB ACTIVATED");
+
+
+                // Listen for new messages on the channel
+                channel.subscribe('message', function(message) {
+                    console.log("SUB MESSAGE On");
+                    const messageData = message.data;
+                    console.log("New message received:", messageData);
+
+                    // Construct the message HTML
+                    const messageHTML = `
+                        <div class="d-flex ${messageData.user_id == currentUserId ? 'justify-content-end' : 'justify-content-start'} mb-4">
+                            <div class="img_cont_msg">
+                                <img src="http://127.0.0.1:8000${messageData.user_image}" class="rounded-circle user_img_msg">
+                            </div>
+                            <div class="msg_cotainer${messageData.user_id == currentUserId ? '_send' : ''}">
+                                ${messageData.content}
+                                <span class="msg_time">${new Date(messageData.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                            </div>
+                        </div>
+                    `;
+
+                    // Append the message to the chat container
+                    const chatCard = document.querySelector('.msg_card_body');
+                    chatCard.innerHTML += messageHTML;
+
+                    // Scroll to the latest message
+                    chatCard.scrollTop = chatCard.scrollHeight;
+                });
+            }
+        </script>
+
+        <script>
+            const ably = new Ably.Realtime('gc70zQ.zXfy1g:y6DWJ-wL4XHejWzKQNQSDKcAaczpiHO4ptz5Lx-LY0Y');
+            const currentUserId = "{{ request.user.id }}";
+            console.log("Current User ID:", currentUserId);
+
+            console.log("SUB ACTIVATED STARTING");
+            chatId = document.getElementById('chat-id-text').value;
+            // Set the channel to listen to for incoming messages
+            console.log('qqqqqqqqqqqqqq',typeof(chatId))
+            console.log(chatId)
+            const channel = ably.channels.get(chatId.toString());
+            console.log("Channel initialized:", channel);
+            console.log(" AFTER SUB ACTIVATED");
+
+
+            // Listen for new messages on the channel
+            channel.subscribe('message', function(message) {
+                console.log("SUB MESSAGE On");
+                const messageData = message.data;
+                console.log("New message received:", messageData);
+
+                // Construct the message HTML
+                const messageHTML = `
+                    <div class="d-flex ${messageData.user_id == currentUserId ? 'justify-content-end' : 'justify-content-start'} mb-4">
+                        <div class="img_cont_msg">
+                            <img src="http://127.0.0.1:8000${messageData.user_image}" class="rounded-circle user_img_msg">
+                        </div>
+                        <div class="msg_cotainer${messageData.user_id == currentUserId ? '_send' : ''}">
+                            ${messageData.content}
+                            <span class="msg_time">${new Date(messageData.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                        </div>
+                    </div>
+                `;
+
+                // Append the message to the chat container
+                const chatCard = document.querySelector('.msg_card_body');
+                chatCard.innerHTML += messageHTML;
+
+                // Scroll to the latest message
+                chatCard.scrollTop = chatCard.scrollHeight;
+            });
+        </script>
+
         <script>
             document.addEventListener('DOMContentLoaded', function() {
                 const contacts = document.querySelectorAll('.contacts li');
@@ -372,6 +462,7 @@
                         const userImage = this.querySelector('.img_cont img').src;
                         console.log('image-url',userImage)
                         assign_chat_id = document.getElementById('chat-id-text').value = chatId;
+                        Sub();
 
                         contacts.forEach(c => c.classList.remove('active'));
                         this.classList.add('active');
@@ -381,10 +472,10 @@
                         chatHeader.querySelector('span').textContent = `${username}`;
                         chatHeader.querySelector('p').textContent = `${chatId} Messages`;
 
-                        console.log("Image Before")
+                        
                         // Replace the default image with the user's image
                         chatHeaderImg.src = userImage;
-                        console.log("Image After")
+                        
             
                         // Clear previous chat messages (optional)
                         chatCard.innerHTML = '';
@@ -479,7 +570,6 @@
 
                                 // Append message to chat card
                                 chatCard.innerHTML += messageHTML;
-                                console.log("workeddddd")
                                 scrollToBottom();
                             });
                         } else {
@@ -494,7 +584,6 @@
         
         <script>
             function SendMessage(){
-                
                 // Get the message content
                 const message = document.getElementById('send-message-content').value;
                 console.log(message)

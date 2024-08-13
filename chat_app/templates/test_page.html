@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Ably Pub/Sub with Django</title>
+    <script src="https://cdn.ably.io/lib/ably.min-1.js"></script>
+</head>
+<body>
+    <textarea id="message" placeholder="Enter a message"></textarea>
+    <button onclick="publishMessage()">Send</button>
+    <div id="messages"></div>
+
+    <script>
+        const ably = new Ably.Realtime('gc70zQ.zXfy1g:y6DWJ-wL4XHejWzKQNQSDKcAaczpiHO4ptz5Lx-LY0Y'); // Replace with your Ably API key
+        const chatId = 'default-channel'; // Replace with the chat ID you want to subscribe to
+        const channel = ably.channels.get(chatId);
+
+        // Subscribe to the channel
+        channel.subscribe('message', function(message) {
+            console.log("SUBSCRIBED")
+            const messagesDiv = document.getElementById('messages');
+            const messageElement = document.createElement('p');
+            messageE0lement.textContent = `Received: ${message.data}`;
+            messagesDiv.appendChild(messageElement);
+        });
+
+        // Function to publish a message
+        function publishMessage() {
+            const message = document.getElementById('message').value;
+            fetch('/publish_message/', { // Replace with the URL to your publish view
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': '{{ csrf_token }}' // Django CSRF token
+                },
+                body: new URLSearchParams({
+                    'message': message,
+                    'chat_id': chatId
+                })
+            }).then(response => response.json())
+              .then(data => console.log(data))
+              .catch(error => console.error('Error:', error));
+        }
+    </script>
+</body>
+</html>

@@ -81,24 +81,48 @@ def send_chat_messages(request):
     chat_id = request.GET.get('chat_id')
     user_id = request.GET.get('user_id')
     message_content = request.GET.get('message')
-    
+
     # Log the received parameters
     print("CHAT_ID:", chat_id, "MESSAGE:", message_content, "USER_ID:", user_id)
-    
+    print(type(chat_id))
+
     # Validate parameters
     if not chat_id or not user_id or not message_content:
         return JsonResponse({'error': 'Missing required parameters'}, status=400)
-    
+
     # Ensure the user exists
     try:
         login_user = CustomUser.objects.get(id=user_id)
     except CustomUser.DoesNotExist:
         return JsonResponse({'error': 'User does not exist'}, status=404)
-    
+
     # Create and save the message
     try:
         message = Message.objects.create(chat_room_id=chat_id, user=login_user, content=message_content)
-        print("Message created:", message)
+        if message:
+            print("entered to MMMMMMMMM")
+            # Use AblyRest for publishing
+            # Construct the dictionary message
+            message = {
+                'user_id': user_id,
+                'content': message_content,
+                'timestamp': message.timestamp.isoformat(),
+                'user_image': login_user.image.url if login_user.image else ''
+            }
+
+            # Publish the dictionary message
+            ably = AblyRest(settings.ABLY_API_KEY)
+            channel = ably.channels.get(chat_id)
+            
+            async def publish():
+                try:
+                    await channel.publish('message', message)
+                    return {'status': 'success'}
+                except Exception as e:
+                    return {'status': 'error', 'message': str(e)}
+
+            result = asyncio.run(publish())
+
         return JsonResponse({'success': "Message sent successfully"})
     except Exception as e:
         print("Error creating message:", e)
@@ -111,3 +135,35 @@ def send_chat_messages(request):
 def logout_view(request):
     request.session.flush()
     return redirect('login')
+
+
+from django.conf import settings
+from django.http import JsonResponse
+from ably import AblyRest
+
+
+
+
+def view_page(request):
+    return render(request,'test_page.html')
+def re(request):
+    return render(request,'re.html')
+
+import asyncio
+def publish_message(request):
+    if request.method == 'POST':
+        message = request.POST.get('message')
+        chat_id = request.POST.get('chat_id')
+        
+        ably = AblyRest(settings.ABLY_API_KEY)
+        channel = ably.channels.get('default-channel')
+        
+        async def publish():
+            try:
+                await channel.publish('message', message)
+                return {'status': 'success'}
+            except Exception as e:
+                return {'status': 'error', 'message': str(e)}
+
+        result = asyncio.run(publish())
+        return JsonResponse(result)

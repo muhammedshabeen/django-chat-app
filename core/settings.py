@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-*l^go__ko27&v!1!yn9wgrq4zcgt2v$usiq+9%w$bm33*8xjdj
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['https://1ab7-202-164-150-83.ngrok-free.app','*']
 
 
 # Application definition
@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'chat_app',
+    'ably',#for live chat
     
 ]
 
@@ -135,4 +136,9 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+ABLY_API_KEY = 'gc70zQ.zXfy1g:y6DWJ-wL4XHejWzKQNQSDKcAaczpiHO4ptz5Lx-LY0Y'
 
+
+CSRF_TRUSTED_ORIGINS = [
+    'https://1ab7-202-164-150-83.ngrok-free.app',
+]
